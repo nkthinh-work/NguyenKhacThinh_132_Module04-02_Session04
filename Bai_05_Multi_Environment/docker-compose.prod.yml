@@ -1,0 +1,17 @@
+# Production: chi ghep voi base, KHONG ghep override staging
+services:
+  backend:
+    environment:
+      ENV: production
+      SPRING_PROFILES_ACTIVE: production
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: never
+    restart: always
+    # Khong publish port de 3 replicas khong tranh chap cong host
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+  postgres:
+    restart: always

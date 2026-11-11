@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Script ho tro lenh ./gradlew (khong phai Gradle Wrapper chinh thuc)
+set -euo pipefail
+cd "$(dirname "$0")"
+if command -v gradle >/dev/null 2>&1; then
+    exec gradle "$@"
+fi
+if command -v docker >/dev/null 2>&1; then
+    # Docker phai dang chay; JDK + Gradle co san trong image
+    exec docker run --rm --user "$(id -u):$(id -g)" \
+        -e GRADLE_USER_HOME=/workspace/.gradle \
+        -v "$PWD:/workspace" -w /workspace \
+        gradle:8.10.2-jdk17 gradle --no-daemon "$@"
+fi
+printf '%s\n' 'Khong tim thay Gradle/Docker. Cai Docker Desktop hoac Gradle va thu lai.' >&2
+exit 1

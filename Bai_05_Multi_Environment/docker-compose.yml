@@ -1,0 +1,39 @@
+# Base Compose: dung chung cho staging va production
+services:
+  backend:
+    build:
+      context: ../storex-demo/backend
+    image: storex-backend:v4
+    environment:
+      ENV: ${ENV:-staging}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-storex_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:?Missing DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASS:?Missing DB_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - storex-net
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${DB_NAME:-storex_db}
+      POSTGRES_USER: ${DB_USER:?Missing DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS:?Missing DB_PASS}
+    volumes:
+      - storex_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    networks:
+      - storex-net
+
+networks:
+  storex-net:
+    driver: bridge
+
+volumes:
+  storex_pgdata:

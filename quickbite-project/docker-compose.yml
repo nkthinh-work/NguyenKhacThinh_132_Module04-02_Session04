@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Missing POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-quickbite_db}
+    volumes:
+      - quickbite_db_data:/var/lib/postgresql/data
+    networks:
+      - quickbite_network
+    # No published DB ports, service is reachable via db:5432 internally
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 3s
+
+  backend:
+    build: .
+    image: quickbite-backend:session04
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-quickbite_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Missing DB_PASSWORD in .env}
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - quickbite_network
+
+volumes:
+  quickbite_db_data:
+    name: quickbite_db_data
+
+networks:
+  quickbite_network:
+    name: quickbite_network
+    driver: bridge

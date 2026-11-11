@@ -1,0 +1,11 @@
+.git
+.gradle
+.env
+**/*.md
+src
+build/classes
+build/generated
+build/reports
+build/test-results
+build/tmp
+# GIU build/libs/app.jar de COPY trong Dockerfile

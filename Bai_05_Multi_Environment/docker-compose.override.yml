@@ -1,0 +1,12 @@
+# Staging/debug: Docker Compose tu nap file nay neu dung lenh `docker compose up`
+services:
+  backend:
+    environment:
+      ENV: staging
+      SPRING_PROFILES_ACTIVE: staging
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+    ports:
+      - "8080:8080"
+    restart: "no"
+    deploy:
+      replicas: 1

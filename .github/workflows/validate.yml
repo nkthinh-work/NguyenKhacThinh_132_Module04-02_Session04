@@ -1,0 +1,39 @@
+name: Validate Docker Compose coursework
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install YAML parser
+        run: pip install -r requirements-dev.txt
+      - name: Static validation
+        run: python scripts/validate_static.py
+      - name: Test shell control flow using mock Docker (no containers)
+        run: python scripts/test_control_mock.py
+      - name: Shell syntax
+        run: |
+          find . -name '*.sh' -print0 | while IFS= read -r -d '' path; do
+            bash -n "$path"
+          done
+      - name: Validate docker compose with sample .env files
+        run: |
+          for d in Bai_03_Env_CustomNetwork Bai_05_Multi_Environment quickbite-project; do
+            cp "$d/.env.example" "$d/.env"
+          done
+          (cd Bai_01_DNS_StoreX && docker compose config --quiet)
+          (cd Bai_02_Volume_Healthcheck && docker compose config --quiet)
+          (cd Bai_03_Env_CustomNetwork && docker compose config --quiet)
+          (cd Bai_04_Nginx_ReverseProxy && docker compose config --quiet)
+          (cd Bai_05_Multi_Environment && docker compose -f docker-compose.yml -f docker-compose.override.yml config --quiet)
+          (cd Bai_05_Multi_Environment && docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet)
+          (cd quickbite-project && docker compose config --quiet)

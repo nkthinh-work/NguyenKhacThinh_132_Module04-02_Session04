@@ -1,0 +1,12 @@
+# Khong commit thong tin nhay cam hay du lieu chay thuc te
+.env
+**/.env
+!.env.example
+**/.gradle/
+**/build/
+**/.DS_Store
+**/.idea/
+**/.vscode/
+**/__pycache__/
+*.pyc
+# Anh bang chung phai do ban tu chup - khong tu dong tao anh gia
